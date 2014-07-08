@@ -5,15 +5,17 @@ module Nox.Crypt (
       , encrypt
     ) where
 
+import Prelude hiding (concat)
 import Data.ByteString.Base64 (decodeLenient)
 import Data.ByteString.Char8 (pack)
 import Data.ByteString.Lazy (toChunks)
 import Data.Conduit
-import Data.ByteString hiding (pack)
+import Data.ByteString hiding (map, pack)
 import Control.Monad.Trans.Resource
 import Data.Word
 import Data.Bits
 import Data.Binary.Strict.Get
+import Data.Binary.Put
 import Text.Heredoc
 
 data FileType = Unused0
@@ -49,10 +51,19 @@ toWords = do
         Nothing -> return ()
 
 fromWords :: (MonadResource m) => Conduit Word32 m ByteString
-fromWords = return () --XXX
+fromWords = do
+    word1 <- await
+    word2 <- await
+    case (word1, word2) of
+        (Just w1, Just w2) -> do
+            yield $ concat $ map (concat . toChunks . runPut . putWord32be) [w1, w2]
+        (Just w1, Nothing) -> leftover w1 -- XXX Maybe pad with 0's here, if that's valid?
+        (Nothing, Nothing) -> return ()
+
+-- DEBUG NOTES
+-- remember words are read and written in big endian! take care of that upstream
 
 cryptWord :: (MonadResource m) => CryptMode -> FileType -> Conduit Word32 m Word32
--- REMEMBER words are read and written in big endian! take care of that upstream
 cryptWord mode fileType = do
     let table = cryptTable fileType
     let offset = case mode of Encrypt -> 0x400
@@ -65,7 +76,7 @@ cryptWord mode fileType = do
             let (w1', w2') = mangle table offset w1 w2 cycles
             yield (w1' `xor` (table !! (offset+2*cycles)))
             yield (w2' `xor` (table !! (offset+2*cycles+1)))
-        (Just w1, Nothing) -> leftover w1 -- XXX Maybe pad with 0's here?
+        (Just w1, Nothing) -> leftover w1 -- XXX Maybe pad with 0's here, if that's valid?
         (Nothing, Nothing) -> return ()
 
 useTable table acc = (table !! 0x000 + acc `shiftR` 24 .&. 0xff)
