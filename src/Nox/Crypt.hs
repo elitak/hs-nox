@@ -93,20 +93,19 @@ mangle table offset w1 w2 times =
     in
         mangle table (offset+2) (w1' `xor` sum2) w2' (times-1)
 
-asWord32s = do
-    empty <- isEmpty
-    if empty
-        then return []
-    else do
-        v <- getWord32be
-        rest <- asWord32s
-        return (v : rest)
-
 -- XXX TODO try benchmarking the access time of these data (using "criterion"),
 -- then switching to some form of Array. Also check C/llvm intermediate files
 -- to make sure quasiquote has transformed them, as intended.
 cryptTable fileType = $([|
-    let (Right x, _) = runGet asWord32s $ (decodeLenient . pack) $ case fileType of
+    let asWord32s = do
+            empty <- isEmpty
+            if empty
+                then return []
+            else do
+                v <- getWord32be
+                rest <- asWord32s
+                return (v : rest)
+        (Right x, _) = runGet asWord32s $ (decodeLenient . pack) $ case fileType of
             Modifier -> [str|ODYxZGJlNzQwZDIxZGY3NTI4YTQ0YWRmZjczZGM1NDI2NTA3ZWU2OWQzMDI5ZTFkZjQ0MTMwMjI2
                             |ZmViCmFiOGY3NWViOTY0YjQ2ZTIwNjNmYTNjZjdkMDAyNWNjYzE1MGZhMTJhMzQyZDhmNjIyYmFk
                             |YTMzNzdlMAoyYjQ2NGYyMWIzN2U0MDVkYzBiNmJkODc2YjYzNTQ3ZmE3NGU3ZjRhYmMwMDAyM2Qz

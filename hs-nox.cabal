@@ -24,6 +24,7 @@ executable noxd
                      , bytestring
                      , base64-bytestring
                      , conduit
+                     , conduit-extra
                      , resourcet
                      , binary
                      , binary-strict
