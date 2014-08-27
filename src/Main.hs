@@ -11,5 +11,4 @@ import Control.Monad.Trans.Resource (runResourceT)
 --      + conduit-cereal??
 main = do
     putStrLn "noxd v0.1" -- v1.0 will be all original nox msgs supported, if not game modes (like Quest)
-    let conduit = sourceFile "gamedata.bin" $= decrypt GameData $$ sinkFile "gamedata.out"
-    runResourceT conduit
+    runResourceT $ sourceFile "gamedata.bin" $= decrypt GameData $$ sinkFile "gamedata.out"

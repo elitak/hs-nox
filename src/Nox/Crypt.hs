@@ -30,24 +30,26 @@ data FileType = Unused0
 
 data CryptMode = Decrypt | Encrypt deriving (Eq, Enum)
 
--- XXX can prly remove specs here later
 decrypt :: (MonadResource m) => FileType -> Conduit ByteString m ByteString
 decrypt = crypt Decrypt
 encrypt :: (MonadResource m) => FileType -> Conduit ByteString m ByteString
 encrypt = crypt Encrypt
 
---crypt :: (MonadResource m) => CryptMode -> FileType -> Conduit ByteString m ByteString
+crypt :: (MonadResource m) => CryptMode -> FileType -> Conduit ByteString m ByteString
 crypt mode fileType = toWords =$= cryptWord mode fileType =$= fromWords
+
+-- FIXME leftovers used wrong! `leftover` passes to next conduit, not self!
 
 toWords :: (MonadResource m) => Conduit ByteString m Word32
 toWords = do
-    bstr <- await
-    case bstr of
+    maybeBytes <- await
+    case maybeBytes of
         (Just bytes) -> do
-            let (Right w1, _) = runGet getWord32le bytes
-            let (Right w2, _) = runGet getWord32le bytes
+            let (Right w1, bytes' ) = runGet getWord32be bytes
+            let (Right w2, bytes'') = runGet getWord32be bytes'
             yield w1
             yield w2
+            leftover bytes''
         Nothing -> return ()
 
 fromWords :: (MonadResource m) => Conduit Word32 m ByteString
@@ -60,9 +62,6 @@ fromWords = do
         (Just w1, Nothing) -> leftover w1 -- XXX Maybe pad with 0's here, if that's valid?
         (Nothing, Nothing) -> return ()
 
--- DEBUG NOTES
--- remember words are read and written in big endian! take care of that upstream
-
 cryptWord :: (MonadResource m) => CryptMode -> FileType -> Conduit Word32 m Word32
 cryptWord mode fileType = do
     let table = cryptTable fileType
@@ -74,24 +73,26 @@ cryptWord mode fileType = do
         (Just w1, Just w2) -> do
             let cycles = 8
             let (w1', w2') = mangle table offset w1 w2 cycles
-            yield (w1' `xor` (table !! (offset+2*cycles)))
-            yield (w2' `xor` (table !! (offset+2*cycles+1)))
+            yield (w2' `xor` table !! (offset + 2*cycles+1))
+            yield (w1' `xor` table !! (offset + 2*cycles  ))
         (Just w1, Nothing) -> leftover w1 -- XXX Maybe pad with 0's here, if that's valid?
         (Nothing, Nothing) -> return ()
 
-useTable table acc = (table !! 0x000 + acc `shiftR` 24 .&. 0xff)
-                   + (table !! 0x100 + acc `shiftR` 16 .&. 0xff)
-               `xor` (table !! 0x200 + acc `shiftR`  8 .&. 0xff)
-                   + (table !! 0x300 + acc `shiftR`  0 .&. 0xff)
-
+mangle :: [Word32] -> Int -> Word32 -> Word32 -> Int -> (Word32, Word32)
 mangle table offset w1 w2 0     = (w1, w2)
 mangle table offset w1 w2 times =
-    let w1'      = w1 `xor` (table !! offset)
+    let w1'      = w1 `xor` table !! offset
         sum1     = useTable table w1'
-        w2'      = w2 `xor` (sum1 `xor` (table !! offset+1))
+        w2'      = w2 `xor` (sum1 `xor` table !! (offset+1))
         sum2     = useTable table w2'
     in
         mangle table (offset+2) (w1' `xor` sum2) w2' (times-1)
+
+useTable :: [Word32] -> Word32 -> Word32
+useTable table word = table !! fromIntegral (0x000 + word `shiftR` 24 .&. 0xff)
+                    + table !! fromIntegral (0x100 + word `shiftR` 16 .&. 0xff)
+                `xor` table !! fromIntegral (0x200 + word `shiftR`  8 .&. 0xff)
+                    + table !! fromIntegral (0x300 + word `shiftR`  0 .&. 0xff)
 
 -- XXX TODO try benchmarking the access time of these data (using "criterion" pkg),
 -- then switching to some form of Array.
