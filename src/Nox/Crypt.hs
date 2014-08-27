@@ -38,18 +38,23 @@ encrypt = crypt Encrypt
 crypt :: (MonadResource m) => CryptMode -> FileType -> Conduit ByteString m ByteString
 crypt mode fileType = toWords =$= cryptWord mode fileType =$= fromWords
 
--- FIXME leftovers used wrong! `leftover` passes to next conduit, not self!
-
 toWords :: (MonadResource m) => Conduit ByteString m Word32
 toWords = do
     maybeBytes <- await
     case maybeBytes of
         (Just bytes) -> do
-            let (Right w1, bytes' ) = runGet getWord32be bytes
-            let (Right w2, bytes'') = runGet getWord32be bytes'
-            yield w1
-            yield w2
-            leftover bytes''
+            let (e1, bytes' ) = runGet getWord32be bytes
+            let (e2, bytes'') = runGet getWord32be bytes'
+            case (e1, e2) of
+                (Right w1, Right w2) -> do
+                    yield w1
+                    yield w2
+                    leftover bytes''
+                    toWords
+                (Right w1, Left _) ->
+                    leftover bytes'
+                otherwise ->
+                    leftover bytes
         Nothing -> return ()
 
 fromWords :: (MonadResource m) => Conduit Word32 m ByteString
@@ -59,6 +64,7 @@ fromWords = do
     case (word1, word2) of
         (Just w1, Just w2) -> do
             yield $ concat $ map (concat . toChunks . runPut . putWord32be) [w1, w2]
+            fromWords
         (Just w1, Nothing) -> leftover w1 -- XXX Maybe pad with 0's here, if that's valid?
         (Nothing, Nothing) -> return ()
 
@@ -75,6 +81,7 @@ cryptWord mode fileType = do
             let (w1', w2') = mangle table offset w1 w2 cycles
             yield (w2' `xor` table !! (offset + 2*cycles+1))
             yield (w1' `xor` table !! (offset + 2*cycles  ))
+            cryptWord mode fileType
         (Just w1, Nothing) -> leftover w1 -- XXX Maybe pad with 0's here, if that's valid?
         (Nothing, Nothing) -> return ()
 
