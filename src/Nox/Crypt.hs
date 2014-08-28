@@ -18,8 +18,7 @@ import Data.Binary.Strict.Get
 import Data.Binary.Put
 import Text.Heredoc
 
-data FileType = Unused0
-              | Player
+data FileType = Player
               | Map
               | Thing
               | Modifier
