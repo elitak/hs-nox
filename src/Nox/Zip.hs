@@ -6,12 +6,13 @@ module Nox.Zip (
 import Debug.Trace
 import Data.Maybe
 import Data.Word
-import Data.BitVector
+import Data.BitVector as BV
 import Data.Conduit
 import Control.Monad.Trans.Resource
 import Data.ByteString as BS hiding (elemIndex, map, foldl1)
-import Data.List hiding (map)
+import Data.List as DL hiding (map)
 import Text.Shakespeare.Text
+import Data.BitString.BigEndian as BiS
 
 --decompress :: (MonadResource m) => Conduit ByteString m ByteString
 compress :: (MonadResource m) => Conduit ByteString m ByteString
@@ -19,20 +20,37 @@ compress = do
     maybeBytes <- await
     case maybeBytes of
         Just bytes -> do
-            yield $ pack $ map (fromIntegral . nat) $ group_ 8 $ foldl1 (\a b -> a#b) $ map encode (unpack bytes)
+            --yield $ pack $ map (fromIntegral . nat) $ group_ 8 $ foldl1 (\a b -> a#b) $ map encode (unpack bytes)
+            let (first, rest) = BiS.splitAt 9 $ bitString bytes
+            let bvec = fromBits $ toList first
+            let (byte, ninth) = encode bvec
+            trace ("split " ++ showHex ( fromBits $ DL.take 9 (toBits bvec))) $ 
+                trace ("retured " ++ show byte ++"("++showHex byte++") and " ++ show ninth) $
+                    yield $ (realizeBitStringStrict . fromList . toBits) byte
+            case size ninth of
+                0 -> leftover $ realizeBitStringStrict rest
+                1 -> leftover $ realizeBitStringStrict $ BiS.concat [fromList $ toBits ninth, rest]
             compress
         Nothing -> return ()
 
-encode :: Word8 -> BV
+encode :: BV -> (BV, BV)
 --encode byte = trace ([st|encoded #{byte} as #{a},#{b}|]) a#b
-encode byte = trace ("encoded " ++ show byte ++ " as " ++ show a ++ "," ++ show b) a#b
-              where (a,b) = toPhrase (fromJust $ elemIndex byte dict) partitions 0 0
+-- vec can be 8 on 9 bits long, or even shorter
+encode vec = --trace ("called with " ++ show vec ++ " aka " ++ (showHex  vec))$
+             case (elemIndex (nat vec) dict, size vec < 9, integerWidth $ nat vec) of
+                  (Just index, False, 9) -> (toWord index, bitVec 0 0) -- 9 bits and legitimately in table: actually consume the ninth
+                  (Just index, True,  x) -> --trace ("width " ++ show x)
+                                            (toWord index, bitVec 0 0)
+                  otherwise              -> (fst $ encode byte, ninth) -- was 9-bits-and-low or wasnt in dict: try again without the trailing bit
+             where (byte, ninth) = (\(a,b)->(fromBits a, fromBits b)) $ DL.splitAt 8 (toBits vec)
 
+toWord absOff = a#b where (a,b) = toPhrase absOff partitions 0 0
 toPhrase absOff ((bits, uBnd):[]  ) lBnd pNdx                 = (bitVec 4  pNdx   , bitVec bits (absOff - uBnd))
 toPhrase absOff ((bits, uBnd):rest) lBnd pNdx | absOff < uBnd = (bitVec 4 (pNdx-1), bitVec bits (absOff - lBnd))
                                               | otherwise     = toPhrase absOff rest uBnd (pNdx+1)
 
 
+-- TODO these tables can probably be reorganized into Enum types that facilitate lookups somehow
 partitions = [ (0x02, 0x00)
              , (0x03, 0x04)
              , (0x03, 0x0C)
