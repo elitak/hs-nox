@@ -26,16 +26,16 @@ compress = fix (\f -> do
     =$= compressBits =$= fix (\f -> do
         mbBits <- await
         case mbBits of
-            --Just bits -> (trace "final cond" yield $ realizeBitStringStrict $ bits) >> f
-            Just bits -> do
-                case (BiS.length bits) `divMod` 8 of
-                    (0, r) -> trace "a" leftover bits
-                    (q, 0) -> do
-                        yield $ trace "b" realizeBitStringStrict $ BiS.take (8*q) bits
-                    (q, _) -> do
-                        yield $ realizeBitStringStrict $ BiS.take (8*q) bits
-                        leftover $ trace "c" BiS.drop (8*q) bits
-                f
+            Just bits -> (yield $ realizeBitStringStrict $ bits) >> f
+            --Just bits -> do
+            --    case (BiS.length bits) `divMod` 8 of
+            --        (0, r) -> trace "a" leftover bits
+            --        (q, 0) -> do
+            --            yield $ trace "b" realizeBitStringStrict $ BiS.take (8*q) bits
+            --        (q, _) -> do
+            --            yield $ realizeBitStringStrict $ BiS.take (8*q) bits
+            --            leftover $ trace "c" BiS.drop (8*q) bits
+            --    f
             Nothing -> return ()
     )
 
@@ -44,31 +44,23 @@ compressBits = do
     mbBits <- await
     case mbBits of
         Just bits -> do
-            --yield $ pack $ map (fromIntegral . nat) $ group_ 8 $ foldl1 (\a b -> a#b) $ map encode (unpack bytes)
-            let (first, rest) = BiS.splitAt 9 bits
-            let bvec = fromBits $ toList first
-            let (byte, ninth) = encode bvec
-            trace ("split " ++ showHex ( fromBits $ DL.take 9 (toBits bvec))) $ 
-                trace ("returned " ++ show byte ++"("++showHex byte++") and " ++ show ninth) $
-                    yield . fromList . toBits $ byte
-            case size ninth of
-                0 -> leftover $ rest
-                --1 -> leftover $ BiS.concat [fromList $ toBits ninth, rest]
-                1 -> let  x =  BiS.concat [fromList $ toBits ninth, rest]
-                     in leftover$trace ("head of new list is " ++ show (BiS.take 16 x)) x
+            let vecs = encode3 bits
+            yield $ fromList $ DL.foldl (\a b -> toBits b ++ a) [] vecs
             compressBits
         Nothing -> return ()
 
-encode :: BV -> (BV, BV)
---encode byte = trace ([st|encoded #{byte} as #{a},#{b}|]) a#b
--- vec can be 8 on 9 bits long, or even shorter
-encode vec = --trace ("called with " ++ show vec ++ " aka " ++ (showHex  vec))$
-             case (elemIndex (nat vec) dict, size vec < 9, integerWidth $ nat vec) of
-                  (Just index, False, 9) -> (toWord index, bitVec 0 0) -- 9 bits and legitimately in table: actually consume the ninth
-                  (Just index, True,  x) -> --trace ("width " ++ show x)
-                                            (toWord index, bitVec 0 0)
-                  otherwise              -> (fst $ encode byte, ninth) -- was 9-bits-and-low or wasnt in dict: try again without the trailing bit
-             where (byte, ninth) = (\(a,b)->(fromBits a, fromBits b)) $ DL.splitAt 8 (toBits vec)
+encode3 = encode2 []
+encode2 acc bits | bits == BiS.empty = acc
+encode2 acc bits =
+    let (first, rest) = BiS.splitAt 9 bits
+        vec = fromBits . toList $ first
+        lookup val = elemIndex (nat val) dict
+        (byte, ninth) = (\(a,b)-> (fromBits a, fromList b)) $ DL.splitAt 8 (toBits vec)
+    in case (lookup vec, integerWidth . nat $ vec) of
+                  -- 9 bits and legitimately in table: actually consume the ninth
+                  (Just index, 9) -> encode2 (toWord index:acc) rest
+                  -- 9 bits but wasnt in dict: use first 8 bits and push back the ninth to input
+                  otherwise       -> encode2 ((toWord . fromJust $ lookup byte) : acc) (BiS.concat [ninth,rest])
 
 toWord absOff = a#b where (a,b) = toPhrase absOff partitions 0 0
 toPhrase absOff ((bits, uBnd):[]  ) lBnd pNdx                 = (bitVec 4  pNdx   , bitVec bits (absOff - uBnd))
