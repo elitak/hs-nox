@@ -1,8 +1,9 @@
+{-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Nox.Zip (
         compress
---      , decompress
     ) where
 
+import Debug.Trace
 import Data.Maybe
 import Data.Word
 import Data.BitVector
@@ -10,6 +11,7 @@ import Data.Conduit
 import Control.Monad.Trans.Resource
 import Data.ByteString as BS hiding (elemIndex, map, foldl1)
 import Data.List hiding (map)
+import Text.Shakespeare.Text
 
 --decompress :: (MonadResource m) => Conduit ByteString m ByteString
 compress :: (MonadResource m) => Conduit ByteString m ByteString
@@ -22,7 +24,9 @@ compress = do
         Nothing -> return ()
 
 encode :: Word8 -> BV
-encode byte = (\(a,b) -> a#b) $ toPhrase (fromJust $ elemIndex byte dict) partitions 0 0
+--encode byte = trace ([st|encoded #{byte} as #{a},#{b}|]) a#b
+encode byte = trace ("encoded " ++ show byte ++ " as " ++ show a ++ "," ++ show b) a#b
+              where (a,b) = toPhrase (fromJust $ elemIndex byte dict) partitions 0 0
 
 toPhrase absOff ((bits, uBnd):[]  ) lBnd pNdx                 = (bitVec 4  pNdx   , bitVec bits (absOff - uBnd))
 toPhrase absOff ((bits, uBnd):rest) lBnd pNdx | absOff < uBnd = (bitVec 4 (pNdx-1), bitVec bits (absOff - lBnd))
