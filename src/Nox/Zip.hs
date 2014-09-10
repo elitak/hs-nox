@@ -9,10 +9,11 @@ import Data.Word
 import Data.BitVector as BV
 import Data.Conduit
 import Control.Monad.Trans.Resource
-import Data.ByteString as BS hiding (elemIndex, map, foldl1)
+import Data.ByteString hiding (elemIndex, map, length, foldl, reverse, splitAt)
 import Data.List as DL hiding (map)
 import Text.Shakespeare.Text
-import Data.BitString.BigEndian as BiS
+import Data.BitString.BigEndian hiding (length, splitAt)
+import qualified Data.BitString.BigEndian as BiS
 import Data.Function
 
 --decompress :: (MonadResource m) => Conduit ByteString m ByteString
@@ -45,7 +46,7 @@ compressBits = do
     case mbBits of
         Just bits -> do
             let vecs = encode3 bits
-            yield $ fromList $ DL.foldl (\a b -> toBits b ++ a) [] vecs
+            yield $ fromList $ foldl (\a b -> toBits b ++ a) [] vecs
             compressBits
         Nothing -> return ()
 
@@ -55,17 +56,16 @@ encode2 acc bits =
     let (first, rest) = BiS.splitAt 9 bits
         vec = fromBits . toList $ first
         lookup val = elemIndex (nat val) dict
-        (byte, ninth) = (\(a,b)-> (fromBits a, fromList b)) $ DL.splitAt 8 (toBits vec)
+        (byte, ninth) = (\(a,b)-> (fromBits a, fromList b)) $ splitAt 8 $ toList first
     in case (lookup vec, integerWidth . nat $ vec) of
                   -- 9 bits and legitimately in table: actually consume the ninth
-                  (Just index, 9) -> encode2 (toWord index:acc) rest
+                  (Just index, 9) -> encode2 (toCode index:acc) rest
                   -- 9 bits but wasnt in dict: use first 8 bits and push back the ninth to input
-                  otherwise       -> encode2 ((toWord . fromJust $ lookup byte) : acc) (BiS.concat [ninth,rest])
+                  otherwise       -> encode2 ((toCode . fromJust $ lookup byte) : acc) (BiS.concat [ninth,rest])
 
-toWord absOff = a#b where (a,b) = toPhrase absOff partitions 0 0
-toPhrase absOff ((bits, uBnd):[]  ) lBnd pNdx                 = (bitVec 4  pNdx   , bitVec bits (absOff - uBnd))
-toPhrase absOff ((bits, uBnd):rest) lBnd pNdx | absOff < uBnd = (bitVec 4 (pNdx-1), bitVec bits (absOff - lBnd))
-                                              | otherwise     = toPhrase absOff rest uBnd (pNdx+1)
+toCode absOff = a#b where (a,b) = toPhrase absOff (reverse partitions) (length partitions - 1)
+toPhrase absOff ((bits, lBnd):rest) pNdx | absOff < lBnd = toPhrase absOff rest (pNdx-1)
+                                         | otherwise     = (bitVec 4 pNdx, bitVec bits (absOff - lBnd))
 
 
 -- TODO these tables can probably be reorganized into Enum types that facilitate lookups somehow
