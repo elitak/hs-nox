@@ -41,7 +41,7 @@ toWords :: (MonadResource m) => Conduit ByteString m Word32
 toWords = do
     maybeBytes <- await
     case maybeBytes of
-        (Just bytes) -> do
+        Just bytes -> do
             let (e1, bytes' ) = runGet getWord32be bytes
             let (e2, bytes'') = runGet getWord32be bytes'
             case (e1, e2) of

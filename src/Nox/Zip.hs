@@ -13,24 +13,50 @@ import Data.ByteString as BS hiding (elemIndex, map, foldl1)
 import Data.List as DL hiding (map)
 import Text.Shakespeare.Text
 import Data.BitString.BigEndian as BiS
+import Data.Function
 
 --decompress :: (MonadResource m) => Conduit ByteString m ByteString
 compress :: (MonadResource m) => Conduit ByteString m ByteString
-compress = do
-    maybeBytes <- await
-    case maybeBytes of
-        Just bytes -> do
+compress = fix (\f -> do
+        mbBytes <- await
+        case mbBytes of
+            Just bytes -> (yield $ bitString bytes) >> f
+            Nothing -> return ()
+    )
+    =$= compressBits =$= fix (\f -> do
+        mbBits <- await
+        case mbBits of
+            --Just bits -> (trace "final cond" yield $ realizeBitStringStrict $ bits) >> f
+            Just bits -> do
+                case (BiS.length bits) `divMod` 8 of
+                    (0, r) -> trace "a" leftover bits
+                    (q, 0) -> do
+                        yield $ trace "b" realizeBitStringStrict $ BiS.take (8*q) bits
+                    (q, _) -> do
+                        yield $ realizeBitStringStrict $ BiS.take (8*q) bits
+                        leftover $ trace "c" BiS.drop (8*q) bits
+                f
+            Nothing -> return ()
+    )
+
+compressBits :: (MonadResource m) => Conduit BitString m BitString
+compressBits = do
+    mbBits <- await
+    case mbBits of
+        Just bits -> do
             --yield $ pack $ map (fromIntegral . nat) $ group_ 8 $ foldl1 (\a b -> a#b) $ map encode (unpack bytes)
-            let (first, rest) = BiS.splitAt 9 $ bitString bytes
+            let (first, rest) = BiS.splitAt 9 bits
             let bvec = fromBits $ toList first
             let (byte, ninth) = encode bvec
             trace ("split " ++ showHex ( fromBits $ DL.take 9 (toBits bvec))) $ 
-                trace ("retured " ++ show byte ++"("++showHex byte++") and " ++ show ninth) $
-                    yield $ (realizeBitStringStrict . fromList . toBits) byte
+                trace ("returned " ++ show byte ++"("++showHex byte++") and " ++ show ninth) $
+                    yield . fromList . toBits $ byte
             case size ninth of
-                0 -> leftover $ realizeBitStringStrict rest
-                1 -> leftover $ realizeBitStringStrict $ BiS.concat [fromList $ toBits ninth, rest]
-            compress
+                0 -> leftover $ rest
+                --1 -> leftover $ BiS.concat [fromList $ toBits ninth, rest]
+                1 -> let  x =  BiS.concat [fromList $ toBits ninth, rest]
+                     in leftover$trace ("head of new list is " ++ show (BiS.take 16 x)) x
+            compressBits
         Nothing -> return ()
 
 encode :: BV -> (BV, BV)
