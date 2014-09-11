@@ -11,8 +11,6 @@ import System.Posix.IO
 import System.Exit
 import Nox.Server
 
--- TODO Consider using Data.Conduit.Network for handling connections and doing the xor-transformation to the stream.
---      + conduit-cereal??
 main = do
     putStrLn "noxd v0.1" -- v1.0 will be all original nox msgs supported, if not game modes (like Quest)
 
