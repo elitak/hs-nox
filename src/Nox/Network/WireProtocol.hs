@@ -4,7 +4,6 @@ module Nox.Network.WireProtocol where
 import Data.Word
 import Data.Serialize
 
--- TODO these must be auto-parseable, preferably using Control.Alternative format like in Aeson parser?
 data PacketHeader = PacketHeader {
         player  :: Word8
       , unk     :: Word8
