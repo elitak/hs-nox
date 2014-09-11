@@ -9,7 +9,7 @@ import System.Posix.IO
 --import System.Posix.Files
 --import System.Posix.Directory
 import System.Exit
-import Nox.Server
+import Nox.Network.Server
 
 main = do
     putStrLn "noxd v0.1" -- v1.0 will be all original nox msgs supported, if not game modes (like Quest)

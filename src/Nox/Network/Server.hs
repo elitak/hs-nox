@@ -1,5 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
-module Nox.Server (
+module Nox.Network.Server (
     noxd
 ) where
 
@@ -9,6 +9,8 @@ import Data.Conduit.Network.UDP
 import Debug.Trace
 import Data.Word
 import Data.ByteString
+
+import Nox.Network.WireProtocol
 
 gamePort = 18590
 maxPayload = 1500
