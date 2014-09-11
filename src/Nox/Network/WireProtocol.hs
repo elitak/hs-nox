@@ -1,7 +1,8 @@
 -- TODO maybe one day move to google protobuf + translator on client
 module Nox.Network.WireProtocol where
 
-import Data.Word (Word8(..))
+import Data.Word
+import Data.Serialize
 
 -- TODO these must be auto-parseable, preferably using Control.Alternative format like in Aeson parser?
 data PacketHeader = PacketHeader {
@@ -10,13 +11,17 @@ data PacketHeader = PacketHeader {
       , event   :: Word8
 } deriving (Eq, Show)
 
+type Extent = Word16
+putExtent = putWord16le
+getExtent = getWord16le
+
 data Event = Event00
            | Event01
            | Event02
            | Event03
            | Event04
            | Event05
-           | Event06 -- TODO: was handled
+           | Event06 -- TODO: was handled but by literal '6' i think
            | Event07
            | Event08
            | Event09

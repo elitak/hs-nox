@@ -11,6 +11,7 @@ import Data.Word
 import Data.ByteString
 
 import Nox.Network.WireProtocol
+import Nox.Network.Messages
 
 gamePort = 18590
 maxPayload = 1500
