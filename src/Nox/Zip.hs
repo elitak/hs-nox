@@ -27,7 +27,8 @@ compress = fix (\f -> do
     =$= compressBits =$= fix (\f -> do
         mbBits <- await
         case mbBits of
-            Just bits -> (yield $ realizeBitStringStrict $ bits) >> f
+            Just bits -> (trace ("final bitlen was " ++ (show $ BiS.length bits))
+                         yield $ realizeBitStringStrict $ bits) >> f
             --Just bits -> do
             --    case (BiS.length bits) `divMod` 8 of
             --        (0, r) -> trace "a" leftover bits
@@ -58,15 +59,26 @@ encode2 acc bits =
         lookup val = elemIndex (nat val) dict
         (byte, ninth) = (\(a,b)-> (fromBits a, fromList b)) $ splitAt 8 $ toList first
     in case (lookup vec, integerWidth . nat $ vec) of
-                  -- 9 bits and legitimately in table: actually consume the ninth
-                  (Just index, 9) -> encode2 (toCode index:acc) rest
-                  -- 9 bits but wasnt in dict: use first 8 bits and push back the ninth to input
-                  otherwise       -> encode2 ((toCode . fromJust $ lookup byte) : acc) (BiS.concat [ninth,rest])
+        -- 9 bits and legitimately in table: actually consume the ninth
+        -- XXX the RE'd C code doesnt seem to use any nine-bit values
+        --(Just absIndex, 9) -> encode2 (toCode absIndex : acc) rest
+        -- 9 bits but wasn't in dict: use first 8 bits and push back the ninth to input
+        otherwise       -> encode2 ((toCode . fromJust $ lookup byte) : acc) (BiS.concat [ninth,rest])
 
 toCode absOff = a#b where (a,b) = toPhrase absOff (reverse partitions) (length partitions - 1)
 toPhrase absOff ((bits, lBnd):rest) pNdx | absOff < lBnd = toPhrase absOff rest (pNdx-1)
                                          | otherwise     = (bitVec 4 pNdx, bitVec bits (absOff - lBnd))
 
+-- TODO: make sure c-encrypt output is the same as this impl. run against many input files and compare. discrepancies prly due to c-encrypt not using 9-bit values in the dictionary...
+-- TODO: make sure those files actually load into the game
+-- TODO: wirte decompress. test on my files then on official (should break at lz77 refs)
+-- TODO: use ollydbg to figuer out the rest? bpaccess that 89th byte of So_Beach?
+-- TODO: in so_beach.map, streams diverge at first 8x3 repeated pattern (source byte 0x58) length-distance should be 0x38, 8, then 0x8 0x10 to repeat it 2 more times. however:
+-- (entire sequence is 40 bits)
+-- 08 03 81 b0 04 (shift this left 1 bit)
+-- 10 07 03 60 08
+-- first 7 bits decoded to 0x104 in table
+-- 03 81 b0 04 00 (33 bits)
 
 -- TODO these tables can probably be reorganized into Enum types that facilitate lookups somehow
 partitions = [ (0x02, 0x00)
@@ -240,4 +252,6 @@ dict = [   0x100, 0x101
          , 0x0FB, 0x0FC
          , 0x0FD, 0x0FE
          , 0x110, 0x111
+         -- That last partition was only up to index 0x0d...
+         -- Are indexes 0x0e (or maybe 0x10) and up treated specially?
          ]

@@ -14,7 +14,7 @@ main = do
     putStrLn "noxd v0.1" -- v1.0 will be all original nox msgs supported, if not game modes (like Quest)
     --runResourceT $ sourceFile "gamedata.bin" $= decrypt GameData $$ sinkFile "gamedata.txt"
     --runResourceT $ sourceFile "So_Beach.map" $= decrypt Map $$ sinkFile "map.out"
-    runResourceT $ sourceFile "So_Beach.map" $= compress $$ sinkFile "map.out"
+    runResourceT $ sourceFile "in.map" $= compress $$ sinkFile "out.nxz"
 
 
 -- TODO Test performance early and often, so that I can make sure the server binary runs as-fast or faster than original in terms of netcode/responsiveness
