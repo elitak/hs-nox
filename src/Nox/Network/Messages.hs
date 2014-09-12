@@ -18,11 +18,18 @@ import Data.Flags.TH
 import Data.Bits
 import Data.Int
 
+-- TODO these will be the ids used later on in packets, not the okSpells field
 data Spell = Anchor
            | Blink
            | Burn
            deriving (Eq, Show, Enum)
 
+-- TODO: I would prefer something that is unified. this solution is limited to 64bit length bitmasks
+-- The only way to do that, I think, is to write a Flags instance for ByteString and use that as the wrapped type
+-- TODO: populate this semi-automatically by having this server return 1 successive bit flipped every ping to work out what
+-- each bit and field do.
+-- TODO: also probably need to twiddle some settings on a listenserver and look at the returned pong; ideally,
+-- use code in here to interrogate the server and dump the current interpretation of the packet.
 bitmaskWrapper "AllowedSpells" ''Int64 []
     [ ("anchor",        1 `shiftL` 1)
     , ("unkSp2",         1 `shiftL` 2)
