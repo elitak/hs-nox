@@ -15,8 +15,13 @@ type Extent = Word16
 putExtent = putWord16le
 getExtent = getWord16le
 
-type Timestamp = DateTime
-getTimestamp = getWord32le >>= return . fromSeconds . fromIntegral
+--type Timestamp = DateTime
+--getTimestamp = getWord32le >>= return . fromSeconds . fromIntegral
+-- TODO this datatype is a bit opaque: figure out exactly what it represents.
+-- I think it's just milliseconds, but from when? What's the 0-point? are the top two bytes handled independently?
+type Timestamp = Word32
+getTimestamp = getWord32le
+putTimestamp = putWord32le
 
 data Event = Event00
            | Event01
