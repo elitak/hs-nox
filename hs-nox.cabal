@@ -35,6 +35,7 @@ executable noxd
                      , network
                      , unix
                      , cereal
+                     , datetime
                      --, cereal-conduit
   hs-source-dirs:      src
   default-language:    Haskell2010

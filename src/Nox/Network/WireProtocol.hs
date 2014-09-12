@@ -3,6 +3,7 @@ module Nox.Network.WireProtocol where
 
 import Data.Word
 import Data.Serialize
+import Data.DateTime
 
 data PacketHeader = PacketHeader {
         player  :: Word8
@@ -14,6 +15,9 @@ type Extent = Word16
 putExtent = putWord16le
 getExtent = getWord16le
 
+type Timestamp = DateTime
+getTimestamp = getWord32le >>= return . fromSeconds . fromIntegral
+
 data Event = Event00
            | Event01
            | Event02
@@ -24,11 +28,11 @@ data Event = Event00
            | Event07
            | Event08
            | Event09
-           | PlayerDisconnect -- was unnamed
+           | PlayerDisconnect
            | Event0b
            | PingServer
-           | Event0d
-           | PlayerConnect -- was unnamed
+           | PongClient
+           | PlayerConnect
            | Event0f
            | Event10
            | Event11

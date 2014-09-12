@@ -9,9 +9,10 @@ import Data.Conduit.Network.UDP
 import Debug.Trace
 import Data.Word
 import Data.ByteString
+import Data.Serialize
 
-import Nox.Network.WireProtocol
 import Nox.Network.Messages
+import qualified Nox.Network.Messages as NM
 
 gamePort = 18590
 maxPayload = 1500
@@ -37,8 +38,13 @@ noxd = withSocketsDo $ do
 --        Nothing -> return ()
 
 handleMsg = do
-    mbData <- await
-    case mbData of
-        Just msg@Message{..} -> trace (show msgData) $ yield msg
+    mbMsg <- await
+    case mbMsg of
+        Just Message{..} -> do
+            case (runGet get msgData) of
+                Right PingServer{..} ->
+                    trace (show PingServer{..})$ return ()
+                Left err ->
+                    trace err $ return ()
+            yield Message{..}
         Nothing -> return ()
-
