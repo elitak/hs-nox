@@ -78,7 +78,7 @@ handleMsg = do
 	                                                  , 0xC0 --notmask
                                                           , 0x00
 	                                                  , 0xD4 , 0x00]
-                                          , okSpells = allBut (markLocation3 .+. lightning .+. earthquake)
+                                          , okSpells = allFlags --allBut (earthquake)
                                           , unkBS2 = pack [ 0xFF , 0xFF , 0xFF , 0xFF
                                                           , 0xFF , 0xFF , 0xFF , 0xFF
                                                           , 0xFF -- Wall in here
