@@ -51,13 +51,9 @@ handleMsg = do
                                           , mapName = BC.pack "Estate\0\0\0"
                                           , gameName = BC.pack "Test\0"
                                           , timestamp = timestamp
-                                          , unkB1 = 0x0f
-                                          , unkB2 = 0x0f
-                                          , unkB3 = 0xff
-                                          , unkB4 = 0xff
-                                          , unkB5 = 0xff
-                                          -- Some of this is the banned spell,weapon,armor bitmask
-                                          , unkBS1 = pack [ 0x01
+                                          , unkB1 = 0x0f --notmask
+                                          , unkB2 = 0x0f --notmask
+                                          , unkBS1 = pack [ 0x01 -- changes high6? bits here crashes game
                                                           , 0x00
 	                                                  , 0x00
 	                                                  , 0x55
@@ -67,24 +63,22 @@ handleMsg = do
 	                                                  , 0x01
 	                                                  , 0x00
 	                                                  , 0x07
-	                                                  , 0x21 , 0x03
-	                                                  , 0x10
-	                                                  , 0xFF -- armors
-                                                          , 0xFF , 0xFF
-                                                          , 0xFF  -- armors
-	                                                  , 0xFF , 0xFF
+	                                                  , 0x21
+                                                          , 0x03
+	                                                  , 0x10]
+                                        , unkBS3 = pack [
+	                                                    0xFF --notmask
                                                           , 0xFF --notmask
+                                                          , 0xFF --notmask!
                                                           , 0xFF --notmask
 	                                                  , 0xC0 --notmask
                                                           , 0x00
 	                                                  , 0xD4 , 0x00]
-                                          --, okSpells = allFlags
-                                          , okSpells = allBut (earthquake .+. fireball)
-                                          , unkBS2 = pack [ 0xFF , 0xFF , 0xFF , 0xFF
-                                                          , 0xFF , 0xFF , 0xFF , 0xFF
-                                                          , 0xFF -- Wall in here
-                                                          , 0xFF -- 8=TeleportToMarker, rest do nothing
-                                                          , 0xFF --notmask?
+                                          , okArmors = allFlags
+                                          , okSpells = allFlags
+                                          , okWeapons = allFlags
+                                          , unkBS2 = pack [
+                                                            0xFF --notmask?
                                                           , 0xFF
                                                           , 0x84
                                                           , 0x82
