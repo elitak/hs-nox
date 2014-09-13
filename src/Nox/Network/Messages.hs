@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE QuasiQuotes #-}
+--{-# LANGUAGE DataKinds #-}
 
 module Nox.Network.Messages where
 
@@ -17,6 +18,19 @@ import Data.Flags
 import Data.Flags.TH
 import Data.Bits
 import Data.Int
+import Data.BitVector
+
+instance Flags BV where
+    noFlags = bitVec 64 0
+    andFlags = (.|.)
+    -- need noFlags here since bitVector will be of length equal to value's position, otherwise.
+    butFlags a b = a .&. complement (noFlags .|. b)
+    commonFlags = (.&.)
+
+instance BoundedFlags BV where
+    allFlags = complement noFlags
+    enumFlags = undefined
+
 
 -- TODO these will be the ids used later on in packets, not the okSpells field
 data Spell = Anchor
@@ -30,7 +44,7 @@ data Spell = Anchor
 -- each bit and field do.
 -- TODO: also probably need to twiddle some settings on a listenserver and look at the returned pong; ideally,
 -- use code in here to interrogate the server and dump the current interpretation of the packet.
-bitmaskWrapper "AllowedSpells" ''Int64 []
+bitmaskWrapper "AllowedSpells" ''BV []
     [  ("anchor",          1   `shiftL` 1)
     ,  ("unkSp2",          1   `shiftL` 2)
     ,  ("unkSp3",          1   `shiftL` 3)

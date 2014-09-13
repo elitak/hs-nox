@@ -78,7 +78,8 @@ handleMsg = do
 	                                                  , 0xC0 --notmask
                                                           , 0x00
 	                                                  , 0xD4 , 0x00]
-                                          , okSpells = allFlags --allBut (earthquake)
+                                          --, okSpells = allFlags
+                                          , okSpells = allBut (earthquake .+. fireball)
                                           , unkBS2 = pack [ 0xFF , 0xFF , 0xFF , 0xFF
                                                           , 0xFF , 0xFF , 0xFF , 0xFF
                                                           , 0xFF -- Wall in here
