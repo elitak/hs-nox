@@ -49,11 +49,12 @@ handleMsg = do
                     let resp = PongClient { actPlayers = 0
                                           , maxPlayers = 1
                                           , mapName = BC.pack "Estate\0\0\0"
-                                          , gameName = BC.pack "Test\0"
+                                          , gameName = BC.pack "toolongwillcrash\0"
                                           , timestamp = timestamp
                                           , unkB1 = 0x0f --notmask
                                           , unkB2 = 0x0f --notmask
-                                          , unkBS1 = pack [ 0x01 -- changes high6? bits here crashes game
+                                          , okWeapons = allFlags
+                                          , unkBS1 = pack [ 0x00 -- 0=640res,1=800,2=1024, changes to high6? bits here crashes game
                                                           , 0x00
 	                                                  , 0x00
 	                                                  , 0x55
@@ -66,20 +67,20 @@ handleMsg = do
 	                                                  , 0x21
                                                           , 0x03
 	                                                  , 0x10]
-                                        , unkBS3 = pack [
+                                          , okArmors = allFlags
+                                          , unkBS3 = pack [
 	                                                    0xFF --notmask
                                                           , 0xFF --notmask
                                                           , 0xFF --notmask!
                                                           , 0xFF --notmask
 	                                                  , 0xC0 --notmask
                                                           , 0x00
-	                                                  , 0xD4 , 0x00]
-                                          , okArmors = allFlags
+	                                                  , 0xD4
+                                                          , 0x00]
                                           , okSpells = allFlags
-                                          , okWeapons = allFlags
                                           , unkBS2 = pack [
                                                             0xFF --notmask?
-                                                          , 0xFF
+                                                          , 0xFF --notmask
                                                           , 0x84
                                                           , 0x82
                                                           , 0xD3
