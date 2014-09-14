@@ -18,42 +18,16 @@ import Data.Bits
 import Data.Int
 import Data.BitVector
 
--- I admit I have no little understanding of how this works, but I think this
--- is the only way I can change the bitlength for the type.
-newtype SpellsBV = SpellsBV BV deriving(Eq, Real, Ord, Num, Enum, Integral, Bits)
-newtype WeaponsBV = WeaponsBV BV deriving(Eq, Real, Ord, Num, Enum, Integral, Bits)
-newtype ArmorsBV = ArmorsBV BV deriving(Eq, Real, Ord, Num, Enum, Integral, Bits)
-
-instance Flags SpellsBV where
-    noFlags = SpellsBV $ bitVec (18*8) 0
+instance Flags BV where
+    noFlags = bitVec 0 0
     andFlags = (.|.)
-    -- need noFlags here since bitVector will be of length equal to value's position, otherwise.
-    butFlags a b = a .&. complement (noFlags .|. b)
+    -- Writing just "(complement b)" here will prefix the value with 0 bits
+    -- before being anded, resulting in a truncated mask (e.g. [4]15 .&.
+    -- (complement [1]1) = [4]0 ), so we need to reconstruct each side,
+    -- ensuring equal size of each vector.
+    butFlags a b = bitVec n a .&. (complement $ bitVec n b)
+        where n = max (size a) (size b)
     commonFlags = (.&.)
-
-instance Flags WeaponsBV where
-    noFlags = WeaponsBV $ bitVec (3*8) 0
-    andFlags = (.|.)
-    -- need noFlags here since bitVector will be of length equal to value's position, otherwise.
-    butFlags a b = a .&. complement (noFlags .|. b)
-    commonFlags = (.&.)
-
-instance Flags ArmorsBV where
-    noFlags = ArmorsBV $ bitVec (4*8) 0
-    andFlags = (.|.)
-    -- need noFlags here since bitVector will be of length equal to value's position, otherwise.
-    butFlags a b = a .&. complement (noFlags .|. b)
-    commonFlags = (.&.)
-
-instance BoundedFlags SpellsBV where
-    allFlags = complement noFlags
-    enumFlags = undefined
-instance BoundedFlags WeaponsBV where
-    allFlags = complement noFlags
-    enumFlags = undefined
-instance BoundedFlags ArmorsBV where
-    allFlags = complement noFlags
-    enumFlags = undefined
 
 -- TODO these will be the ids used later on in packets, not the okSpells field
 data Spell = Anchor
@@ -67,8 +41,7 @@ data Spell = Anchor
 -- each bit and field do.
 -- TODO: also probably need to twiddle some settings on a listenserver and look at the returned pong; ideally,
 -- use code in here to interrogate the server and dump the current interpretation of the packet.
--- TODO: find out why it is that allFlags does not set fields not listed here
-bitmaskWrapper "AllowedSpells" ''SpellsBV []
+bitmaskWrapper "AllowedSpells" ''BV []
     [  ("unkSp0",          1   `shiftL` 0) --nothing
     ,  ("anchor",          1   `shiftL` 1)
     ,  ("unkSp2",          1   `shiftL` 2)
@@ -223,7 +196,7 @@ bitmaskWrapper "AllowedSpells" ''SpellsBV []
     ,  ("unkSp143",         1   `shiftL` 143) --nothing?
     ]
 
-bitmaskWrapper "AllowedWeapons" ''WeaponsBV []
+bitmaskWrapper "AllowedWeapons" ''BV []
     [  ("flag",          1   `shiftL` 0)
     ,  ("quiver",          1   `shiftL` 1)
     ,  ("bow",          1   `shiftL` 2)
@@ -252,7 +225,7 @@ bitmaskWrapper "AllowedWeapons" ''WeaponsBV []
     ,  ("halberdOfHorrendous",      1   `shiftL` 23)
     ]
 
-bitmaskWrapper "AllowedArmors" ''ArmorsBV []
+bitmaskWrapper "AllowedArmors" ''BV []
     [  ("sneakers",          1   `shiftL` 0)
     ,  ("cloak",          1   `shiftL` 1)
     ,  ("pants",          1   `shiftL` 2)
@@ -290,9 +263,9 @@ bitmaskWrapper "AllowedArmors" ''ArmorsBV []
     ,  ("unkAr31",      1   `shiftL` 31) --nothing?
     ]
 
-putAllowedSpells (AllowedSpells (SpellsBV mask)) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group_ 8 mask)))
-putAllowedWeapons (AllowedWeapons (WeaponsBV mask)) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group_ 8 mask)))
-putAllowedArmors (AllowedArmors (ArmorsBV mask)) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group_ 8 mask)))
+putAllowedSpells (AllowedSpells mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group_ 8 mask)))
+putAllowedWeapons (AllowedWeapons mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group_ 8 mask)))
+putAllowedArmors (AllowedArmors mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group_ 8 mask)))
 
 -- REMEMBER to keep these in enum order else resorting them in 4 spotsgets difficult...
 data Message = Event00
