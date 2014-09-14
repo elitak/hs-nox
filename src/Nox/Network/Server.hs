@@ -47,8 +47,9 @@ handleMsg = do
                 Right PingServer{..} -> do
                     let resp = PongClient { actPlayers = 0
                                           , maxPlayers = 1
-                                          , mapName = BC.pack "Estate\0\0\0"
-                                          , gameName = BC.pack "toolongwillcrash\0"
+                                          -- length must be 9, inc null; otherwise text prints until null encountered
+                                          , mapName = BC.pack "FakeMap"
+                                          , gameName = BC.pack "noxd" -- maxlen is 31 inc null
                                           , timestamp = timestamp
                                           , unkB1 = 0x0f --notmask
                                           , unkB2 = 0x0f --notmask

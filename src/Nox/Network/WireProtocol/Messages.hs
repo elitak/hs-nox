@@ -3,7 +3,7 @@
 module Nox.Network.WireProtocol.Messages where
 
 import Data.Word
-import Data.ByteString
+import Data.ByteString.Char8 as BS
 import Data.Serialize
 
 import qualified Nox.Network.Events as E (Event(..))
@@ -19,6 +19,17 @@ data PacketHeader = PacketHeader {
 type Extent = Word16
 putExtent = putWord16le
 getExtent = getWord16le
+
+putMaxLen len a = putByteString $ BS.concat [BS.take len a, pack "\0"]
+putAbsLen len a = putByteString $ BS.concat [BS.take (len - 1) a, BS.replicate (max (len - BS.length a) 1) '\0']
+
+type GameName = ByteString
+putGameName = putMaxLen 30
+type MapName = ByteString
+putMapName = putAbsLen 9
+
+putEvent = putWord8 . fromIntegral . fromEnum
+getEvent = getWord8 >>= return . toEnum . fromIntegral
 
 --type Timestamp = DateTime
 --getTimestamp = getWord32le >>= return . fromSeconds . fromIntegral
@@ -52,14 +63,14 @@ data Message = Event00
                                        , unkB1 :: Word8
                                        , unkB2 :: Word8
                                        , okWeapons :: AllowedWeapons
-                                       , mapName :: ByteString -- 9 long (null term?)
+                                       , mapName :: MapName
                                        , unkBS1 :: ByteString
                                        , okArmors :: AllowedArmors
                                        , unkBS3 :: ByteString
                                        , timestamp :: Timestamp
                                        , okSpells :: AllowedSpells
                                        , unkBS2 :: ByteString
-                                       , gameName :: ByteString } -- null terminated
+                                       , gameName :: GameName } -- null terminated
              | PlayerConnect           { nullB1 :: Word8
                                        , playerName :: ByteString -- 12 wide chars (24)
                                        , unkBS1 :: ByteString -- 28 unknown
@@ -563,9 +574,6 @@ instance Enum Message where
     -- appropriately. A Message can't be sensibly constructed from an Int id alone.
     toEnum = undefined
 
-putEvent = putWord8 . fromIntegral . fromEnum
-getEvent = getWord8 >>= return . toEnum . fromIntegral
-
 instance Serialize Message where
     put m = do
         -- TODO: handle rest of header in up/downstream conduits? (player Word8, unknown Word8)
@@ -579,14 +587,14 @@ instance Serialize Message where
                 putWord8    unkB1
                 putWord8    unkB2
                 putAllowedWeapons okWeapons
-                putByteString mapName
+                putMapName  mapName
                 putByteString unkBS1
                 putAllowedArmors okArmors
                 putByteString unkBS3
                 putWord32le timestamp
                 putAllowedSpells okSpells
                 putByteString unkBS2
-                putByteString gameName
+                putGameName gameName
             ReportHealth{..} -> do
                 putExtent extent
                 putWord16le health
