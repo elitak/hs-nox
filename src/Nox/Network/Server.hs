@@ -13,8 +13,7 @@ import qualified Data.ByteString.Char8 as BC
 import Data.Serialize
 import Data.Flags
 
-import Nox.Network.Messages
-import qualified Nox.Network.Messages as NM
+import Nox.Network.WireProtocol
 
 gamePort = 18590
 maxPayload = 1500
