@@ -18,6 +18,7 @@ import Nox.Network.WireProtocol
 gamePort = 18590
 maxPayload = 1500
 
+noxd :: IO ()
 noxd = withSocketsDo $ do
     sock <- socket AF_INET Datagram 0
     bindSocket sock (SockAddrInet gamePort iNADDR_ANY)

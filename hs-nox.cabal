@@ -33,7 +33,6 @@ executable noxd
                      , shakespeare
                      , bitstring
                      , network
-                     , unix
                      , cereal
                      , datetime
                      , data-flags
