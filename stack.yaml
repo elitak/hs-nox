@@ -1,8 +1,8 @@
 flags: {}
 packages:
 - '.'
-- bitstring-0.0.0/
 extra-deps:
+- bitstring-0.0.0
 - binary-strict-0.4.8.2
 - bv-0.3.0
 - data-flags-0.0.3.1

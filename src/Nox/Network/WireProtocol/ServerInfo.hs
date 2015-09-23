@@ -6,7 +6,7 @@ import Data.Flags
 import Data.Flags.TH
 import Data.BitVector
 
-import Data.ByteString
+import Data.ByteString hiding (group)
 import Data.Serialize
 
 instance Flags BV where
@@ -254,8 +254,8 @@ bitmaskWrapper "AllowedArmors" ''BV []
     ,  ("unkAr31",      1   `shiftL` 31) --nothing?
     ]
 
-putAllowedSpells (AllowedSpells mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group_ 8 mask)))
-putAllowedWeapons (AllowedWeapons mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group_ 8 mask)))
-putAllowedArmors (AllowedArmors mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group_ 8 mask)))
+putAllowedSpells (AllowedSpells mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
+putAllowedWeapons (AllowedWeapons mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
+putAllowedArmors (AllowedArmors mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
 
 
