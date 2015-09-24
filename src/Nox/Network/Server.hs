@@ -61,7 +61,7 @@ noxd = withSocketsDo $ do
     refreshConfig confVar
     sock <- socket AF_INET Datagram 0
     bindSocket sock (SockAddrInet gamePort iNADDR_ANY)
-    -- TODO Insert xor code tinto this pipeline somewhere for transparent ciphering.
+    -- TODO Insert xor code into this pipeline somewhere for transparent ciphering.
     --      It has to be used conditionally, based on what msgtype arrives.
     --let loop sock = (sourceSocket sock maxPayload $= decipher =$= handleMsg =$= encipher $$ sinkToSocket sock) >> loop sock
     -- TODO Am i even getting anything out of using conduits here?
@@ -81,12 +81,13 @@ noxd = withSocketsDo $ do
 handleMsg confVar = do
     mbMsg <- await
     -- XXX really re-read config every loop??
-    conf <- liftIO $ takeMVar confVar
+    config@Config{..} <- liftIO $ takeMVar confVar
+    let ServerStatus{..} = serverStatus
     liftIO $ refreshConfig confVar -- FIXME: has to run 3 times to actually reload???
 
     case mbMsg of
         Just Message{..} -> do
-        -- TODO Yampa needs to replace this to handle events
+        -- TODO NetWire/other-reactive-lib needs to replace this to handle events
             case runGet get msgData of
                 Right PingServer{..} -> do
                     let resp = PongClient { actPlayers = 0
@@ -97,21 +98,25 @@ handleMsg confVar = do
                                           , timestamp = timestamp
                                           , unkB1 = 0x0f --notmask
                                           , unkB2 = 0x0f --notmask
-                                          , okWeapons = allBut (mconcat (bannedWeapons . serverStatus $ conf))
-                                          , unkBS1 = pack [ 0x00 -- 0=640res,1=800,2=1024, changes to high6? bits here crashes game
-                                                          , 0x00
+                                          , okWeapons = allBut $ mconcat bannedWeapons
+                                          , resolution = resHigh
+                                          , unkBS1 = pack [ 0x00
 	                                                  , 0x00
 	                                                  , 0x55
 	                                                  , 0x00
 	                                                  , 0x9A
 	                                                  , 0x03
 	                                                  , 0x01
-	                                                  , 0x00
-	                                                  , 0x07
-	                                                  , 0x21
-                                                          , 0x03
-	                                                  , 0x10]
-                                          , okArmors = allBut (mconcat (bannedArmors . serverStatus $ conf))
+	                                                  , 0x00]
+                                          , gameType = quest
+                                                          --, 0x00 -- bitwise: chat flagball kotr ctf arena? arena? arena? arena?
+                                                          --, 0x00 -- bitwise: clanLadder individualLadder arena quest arena elimination arena arena
+	                                                         -- 0x07,0x21 TODO this means default arena, but what are the extra bits?
+                                                                 -- maybe 1 bit is team vs nonteam arena?
+                                                                 -- maybe some bits depend on info later on like quest lvl
+                                          , unkBS1a = pack [ 0x03
+	                                                   , 0x10]
+                                          , okArmors = allBut $ mconcat bannedArmors
                                           , unkBS3 = pack [
 	                                                    0xFF --notmask
                                                           , 0xFF --notmask
@@ -122,14 +127,14 @@ handleMsg confVar = do
 	                                                  , 0xD4
                                                           , 0x00]
                                             -- FIXME bug here when okSpells = noFlags (overflow of some kind in client)
-                                          , okSpells = allBut (mconcat (bannedSpells . serverStatus $ conf))
+                                          , okSpells = allBut $ mconcat bannedSpells
                                           , unkBS2 = pack [
                                                             0xFF --notmask?
                                                           , 0xFF --notmask
-                                                          , 0x84
-                                                          , 0x82
-                                                          , 0xD3
-                                                          , 0x01 ]
+                                                          ]
+                                          , questLevel = 1337
+                                          , unkBS2a = pack [ 0xD3
+                                                           , 0x01 ]
                                           }
                     let msgData = runPut $ put resp
                     trace ("resp msg is " ++ show resp) $ 

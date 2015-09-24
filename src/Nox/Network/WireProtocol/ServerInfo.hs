@@ -248,9 +248,31 @@ bitmaskWrapper "AllowedArmors" ''BV []
     , ("unuAr31",           1 `shiftL` 31)
     ]
 
-putAllowedSpells (AllowedSpells mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
+-- 0=640res,1=800,2=1024, changes to high6? bits here crashes game
+bitmaskWrapper "Resolution" ''BV []
+    [ ("resLow",  0)
+    , ("resMed",  1  `shiftL` 0)
+    , ("resHigh", 1  `shiftL` 1)
+    ]
+
+bitmaskWrapper "GameType" ''BV []
+    [ ("arena",            1 `shiftL` 1)  -- also just 0 and all other elided bits
+    , ("ctf",              1 `shiftL` 4)
+    , ("kotr",             1 `shiftL` 5)
+    , ("flagball",         1 `shiftL` 6)
+    , ("chat",             1 `shiftL` 7)
+    , ("elimination",      1 `shiftL` 10)
+    , ("quest",            1 `shiftL` 12)
+    , ("individualLadder", 1 `shiftL` 14)
+    , ("clanLadder",       1 `shiftL` 15)
+    ]
+
+-- TODO make singular putBitVectorAsBytes
+putAllowedSpells  (AllowedSpells  mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
 putAllowedWeapons (AllowedWeapons mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
-putAllowedArmors (AllowedArmors mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
+putAllowedArmors  (AllowedArmors  mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
+putGameType       (GameType       mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
+putResolution     (Resolution     mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
 
 
 instance FromJSON AllowedSpells where

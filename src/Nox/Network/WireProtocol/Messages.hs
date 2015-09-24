@@ -38,6 +38,7 @@ getEvent = getWord8 >>= return . toEnum . fromIntegral
 type Timestamp = Word32
 getTimestamp = getWord32le
 putTimestamp = putWord32le
+putQuestLevel = putWord16le
 
 -- REMEMBER to keep these in enum order else resorting them in 4 spots gets difficult...
 data Message = Event00
@@ -60,16 +61,21 @@ data Message = Event00
                                        , timestamp :: Timestamp }
              | PongClient              { actPlayers :: Word8
                                        , maxPlayers :: Word8
+                                       , resolution :: Resolution
                                        , unkB1 :: Word8
                                        , unkB2 :: Word8
                                        , okWeapons :: AllowedWeapons
                                        , mapName :: MapName
                                        , unkBS1 :: ByteString
+                                       , gameType :: GameType
+                                       , unkBS1a :: ByteString
                                        , okArmors :: AllowedArmors
                                        , unkBS3 :: ByteString
                                        , timestamp :: Timestamp
                                        , okSpells :: AllowedSpells
                                        , unkBS2 :: ByteString
+                                       , questLevel :: Word16
+                                       , unkBS2a :: ByteString
                                        , gameName :: GameName } -- null terminated
              | PlayerConnect           { nullB1 :: Word8
                                        , playerName :: ByteString -- 12 wide chars (24)
@@ -588,12 +594,17 @@ instance Serialize Message where
                 putWord8    unkB2
                 putAllowedWeapons okWeapons
                 putMapName  mapName
+                putResolution resolution
                 putByteString unkBS1
+                putGameType gameType
+                putByteString unkBS1a
                 putAllowedArmors okArmors
                 putByteString unkBS3
                 putWord32le timestamp
                 putAllowedSpells okSpells
                 putByteString unkBS2
+                putQuestLevel questLevel
+                putByteString unkBS2a
                 putGameName gameName
             ReportHealth{..} -> do
                 putExtent extent
