@@ -43,6 +43,8 @@ executable noxd
                      , cereal
                      , datetime
                      , data-flags
+                     , yaml
+                     , transformers
                      --, template-haskell
                      --, cereal-conduit
   hs-source-dirs:      src
