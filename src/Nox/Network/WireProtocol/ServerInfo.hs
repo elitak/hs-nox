@@ -13,6 +13,7 @@ import Data.Serialize
 import Data.Yaml
 import Control.Applicative (pure)
 import Control.Monad (mzero)
+import Data.Monoid (Monoid(..), mconcat)
 
 instance Flags BV where
     noFlags = bitVec 0 0
@@ -256,13 +257,18 @@ bitmaskWrapper "Resolution" ''BV []
     ]
 
 bitmaskWrapper "GameType" ''BV []
-    [ ("arena",            1 `shiftL` 1)  -- also just 0 and all other elided bits
+    [ ("unkGT1",           1 `shiftL` 1)
+    , ("unkGT2",           1 `shiftL` 2)
+    , ("unkGT3",           1 `shiftL` 3)
     , ("ctf",              1 `shiftL` 4)
     , ("kotr",             1 `shiftL` 5)
     , ("flagball",         1 `shiftL` 6)
     , ("chat",             1 `shiftL` 7)
+    , ("arena",            1 `shiftL` 8) -- many other unknown bits default to arena, i think.
     , ("elimination",      1 `shiftL` 10)
+    , ("unkGT11",          1 `shiftL` 11)
     , ("quest",            1 `shiftL` 12)
+    , ("unkGT13",          1 `shiftL` 13)
     , ("individualLadder", 1 `shiftL` 14)
     , ("clanLadder",       1 `shiftL` 15)
     ]
@@ -485,3 +491,29 @@ instance FromJSON AllowedArmors where
     parseJSON (String "unuAr31") = pure unuAr31
     parseJSON _                    = mzero
 
+instance FromJSON GameType where
+    parseJSON (String "arena")            =     pure arena
+    parseJSON (String "ctf")              =     pure ctf
+    parseJSON (String "kotr")             =     pure kotr
+    parseJSON (String "flagball")         =     pure flagball
+    parseJSON (String "chat")             =     pure chat
+    parseJSON (String "elimination")      =     pure elimination
+    parseJSON (String "quest")            =     pure quest
+    parseJSON (String "individualLadder") =     pure individualLadder
+    parseJSON (String "clanLadder")       =     pure clanLadder
+    parseJSON _                           =     mzero
+
+-- This allows us to "fold mconcat [AllowedSpells]"
+instance Monoid AllowedSpells where
+    mempty = noFlags
+    mappend = (.+.)
+instance Monoid AllowedWeapons where
+    mempty = noFlags
+    mappend = (.+.)
+instance Monoid AllowedArmors where
+    mempty = noFlags
+    mappend = (.+.)
+-- TODO can do this instead?
+--instance BitVector a => Monoid a where
+--    mempty = noFlags
+--    mappend = (.+.)

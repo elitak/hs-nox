@@ -17,8 +17,8 @@ import Data.Flags
 import Data.Yaml
 import Control.Concurrent hiding (yield)
 import Control.Monad.IO.Class (liftIO)
-import Data.Monoid
 import GHC.Generics
+import Data.Monoid (mconcat)
 
 import Nox.Network.WireProtocol
 import Nox.Network.WireProtocol.ServerInfo
@@ -32,27 +32,23 @@ data Config = Config { serverStatus :: ServerStatus
 data ServerStatus = ServerStatus { bannedSpells :: [AllowedSpells]
                                  , bannedWeapons :: [AllowedWeapons]
                                  , bannedArmors :: [AllowedArmors]
+                                 , gameType :: GameType
                                  } deriving (Eq, Show, Generic)
 
 instance FromJSON Config
 instance FromJSON ServerStatus
 
-
--- This allows us to "fold mconcat [AllowedSpells]"
-instance Monoid AllowedSpells where
-    mempty = noFlags
-    mappend = (.+.)
-instance Monoid AllowedWeapons where
-    mempty = noFlags
-    mappend = (.+.)
-instance Monoid AllowedArmors where
-    mempty = noFlags
-    mappend = (.+.)
-
 refreshConfig confVar = do
-    --let newConf = Config { serverStatus = ServerStatus { bannedSpells = [lightning] } }
-    Right newConf <- decodeFileEither "config.yaml"
+    firstRun <- isEmptyMVar confVar
+    if firstRun then
+        return ()
+    else do
+        takeMVar confVar
+        return ()
+
+    Right newConf <- decodeFileEither "config.yaml" -- TODO hanble decode errors
     Prelude.putStrLn "re-read config"
+
     putMVar confVar newConf
 
 noxd :: IO ()
@@ -80,10 +76,11 @@ noxd = withSocketsDo $ do
 
 handleMsg confVar = do
     mbMsg <- await
+
     -- XXX really re-read config every loop??
-    config@Config{..} <- liftIO $ takeMVar confVar
+    liftIO $ refreshConfig confVar
+    config@Config{..} <- liftIO $ readMVar confVar
     let ServerStatus{..} = serverStatus
-    liftIO $ refreshConfig confVar -- FIXME: has to run 3 times to actually reload???
 
     case mbMsg of
         Just Message{..} -> do
@@ -108,7 +105,7 @@ handleMsg confVar = do
 	                                                  , 0x03
 	                                                  , 0x01
 	                                                  , 0x00]
-                                          , gameType = quest
+                                          , gameType = gameType
                                                           --, 0x00 -- bitwise: chat flagball kotr ctf arena? arena? arena? arena?
                                                           --, 0x00 -- bitwise: clanLadder individualLadder arena quest arena elimination arena arena
 	                                                         -- 0x07,0x21 TODO this means default arena, but what are the extra bits?
