@@ -60,9 +60,9 @@ bitmaskWrapper "AllowedSpells" ''BV []
     ,  ("drainMana",         1   `shiftL` 22)
     ,  ("earthquake",      1   `shiftL` 23)
 
-    ,  ("unkSp24",         1   `shiftL` 24)
-    ,  ("unkSp25",         1   `shiftL` 25)
-    ,  ("unkSp26",         1   `shiftL` 26)
+    ,  ("energyBolt",      1   `shiftL` 24)
+    ,  ("unkSp25",         1   `shiftL` 25) --nothing
+    ,  ("fear",         1   `shiftL` 26)
     ,  ("fireball",        1   `shiftL` 27)
     ,  ("unkSp28",         1   `shiftL` 28)
     ,  ("unkSp29",         1   `shiftL` 29)
