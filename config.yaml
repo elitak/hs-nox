@@ -1,0 +1,51 @@
+serverStatus:
+    # all the unused/unknowns are left in, with the hopes that someday they'll show up and can be IDed
+    bannedSpells:
+        - unuSp0
+        - unuSp2
+        - unuSp3
+        - unuSp6
+        - unuSp7
+        - unuSp11
+        - unuSp15
+        - unuSp17
+        - unuSp18
+        - unuSp20
+        - unuSp25
+        - unuSp28
+        - unuSp30
+        - unuSp32
+        - unuSp45
+        - unuSp53
+        - unuSp55
+        - unuSp57
+        - unuSp59
+        - unuSp63
+        - unuSp68
+        - unuSp69
+        - unuSp73
+        - unuSp79
+        - unuSp117
+        - unuSp118
+        - unuSp119
+        - unuSp120
+        - unuSp121
+        - unuSp131
+        - unuSp133
+        - unuSp137
+        - unuSp137
+        - unuSp139
+        - unuSp140
+        - unuSp141
+        - unuSp142
+        - unuSp143
+    bannedWeapons:
+        - unuWp4
+        - unuWp5
+    bannedArmors:
+        - unuAr26
+        - unuAr27
+        - unuAr28
+        - unuAr29
+        - unuAr30
+        - unuAr31
