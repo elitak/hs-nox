@@ -7,7 +7,7 @@ synopsis:            A reimplementation of Westwood Studio's Nox, released in 20
 description:         This project's first priority is to reimplement the Nox
                      dedicated server as a headless, cross-platform binary.
 -- license:             
-license-file:        LICENSE
+--license-file:        LICENSE
 author:              Eric Litak
 maintainer:          elitak@gmail.com
 -- copyright:           

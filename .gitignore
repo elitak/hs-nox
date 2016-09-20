@@ -1,0 +1,6 @@
+package.nix
+result*
+dist
+*.nxz
+*.map
+*.bin*
