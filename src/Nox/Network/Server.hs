@@ -43,7 +43,7 @@ handleMsg = do
     case mbMsg of
         Just Message{..} -> do
         -- TODO Yampa needs to replace this to handle events
-            case (runGet get msgData) of
+            case runGet get msgData of
                 Right PingServer{..} -> do
                     let resp = PongClient { actPlayers = 0
                                           , maxPlayers = 1

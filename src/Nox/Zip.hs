@@ -18,7 +18,7 @@ import Data.Function
 
 --decompress :: (MonadResource m) => Conduit ByteString m ByteString
 compress :: (MonadResource m) => Conduit ByteString m ByteString
-compress = fix (\f -> do
+compress = fix (\f -> do -- XXX TODO use 'where' clause instead of 'fix'
         mbBytes <- await
         case mbBytes of
             Just bytes -> (yield $ bitString bytes) >> f
