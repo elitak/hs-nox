@@ -54,7 +54,7 @@ handleMsg = do
                                           , unkB1 = 0x0f --notmask
                                           , unkB2 = 0x0f --notmask
                                           , okWeapons = allFlags
-                                          , unkBS1 = pack [ 0x00 -- 0=640res,1=800,2=1024, changes to high6? bits here crashes game
+                                          , unkBS1 = pack [ 0x00 -- 0=640res,1=800,2=1024; (any?) changes to higher bits here crashes the client.
                                                           , 0x00
                                                           , 0x00
                                                           , 0x55
@@ -68,8 +68,7 @@ handleMsg = do
                                                           , 0x03
                                                           , 0x10]
                                           , okArmors = allFlags
-                                          , unkBS3 = pack [
-                                                            0xFF --notmask
+                                          , unkBS3 = pack [ 0xFF --notmask
                                                           , 0xFF --notmask
                                                           , 0xFF --notmask!
                                                           , 0xFF --notmask
@@ -78,8 +77,7 @@ handleMsg = do
                                                           , 0xD4
                                                           , 0x00]
                                           , okSpells = allFlags
-                                          , unkBS2 = pack [
-                                                            0xFF --notmask?
+                                          , unkBS2 = pack [ 0xFF --notmask?
                                                           , 0xFF --notmask
                                                           , 0x84
                                                           , 0x82
