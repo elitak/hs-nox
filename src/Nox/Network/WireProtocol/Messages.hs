@@ -104,225 +104,225 @@ data Message = Event00
              | Event24
              | Event25
              | Event26
-	     | PartialTimestamp               { shortTimestamp :: Word16 }
-	     | FullTimestamp
-	     | NeedTimestamp
-	     | SimulatedTimestamp
-	     | UseMap
-	     | JoinData
+             | PartialTimestamp               { shortTimestamp :: Word16 }
+             | FullTimestamp
+             | NeedTimestamp
+             | SimulatedTimestamp
+             | UseMap
+             | JoinData
              | NewPlayer            { extent      :: Extent
                                     , info        :: ByteString }
-	     | PlayerQuit
-	     | SimpleObj
-	     | ComplexObj
-	     | DestroyObject
-	     | ObjectOutOfSight
-	     | ObjectInShadows
-	     | ObjectFriendAdd
-	     | ObjectFriendRemove
-	     | ResetFriends
-	     | EnableObject
-	     | DisableObject
-	     | DrawFrame
-	     | DestroyWall
-	     | OpenWall
-	     | CloseWall
-	     | ChangeOrAddWallMagic
-	     | RemoveWallMagic
-	     | PlayerInput
-	     | PlayerSetWaypoint
-	     | ReportHealth         { extent      :: Extent
+             | PlayerQuit
+             | SimpleObj
+             | ComplexObj
+             | DestroyObject
+             | ObjectOutOfSight
+             | ObjectInShadows
+             | ObjectFriendAdd
+             | ObjectFriendRemove
+             | ResetFriends
+             | EnableObject
+             | DisableObject
+             | DrawFrame
+             | DestroyWall
+             | OpenWall
+             | CloseWall
+             | ChangeOrAddWallMagic
+             | RemoveWallMagic
+             | PlayerInput
+             | PlayerSetWaypoint
+             | ReportHealth         { extent      :: Extent
                                     , health      :: Word16 }
-	     | ReportHealthDelta
-	     | ReportPlayerHealth
-	     | ReportItemHealth
-	     | ReportMana           { extent      :: Extent
+             | ReportHealthDelta
+             | ReportPlayerHealth
+             | ReportItemHealth
+             | ReportMana           { extent      :: Extent
                                     , mana        :: Word16 }
-	     | ReportPoison
-	     | ReportStamina
-	     | ReportStats                    { extent   :: Extent
+             | ReportPoison
+             | ReportStamina
+             | ReportStats                    { extent   :: Extent
                                               , hp       :: HealthPoints
                                               , mp       :: ManaPoints
                                               , weight   :: Weight
                                               , speed    :: Speed
                                               , strength :: Strength
                                               , level    :: Level }
-	     | ReportArmorValue
-	     | ReportGold
-	     | ReportPickup
-	     | ReportModifiablePickup
-	     | ReportDrop
-	     | ReportLesson
-	     | ReportMundaneArmorEquip
-	     | ReportMundaneWeaponEquip
-	     | ReportModifiableWeaponEquip
-	     | ReportModifiableArmorEquip
-	     | ReportArmorDequip
-	     | ReportWeaponDequip
-	     | ReportTreasureCount
-	     | ReportFlagBallWinner
-	     | ReportFlagWinner
-	     | ReportDeathmatchWinner
-	     | ReportDeathmatchTeamWinner
-	     | ReportEnchantment
-	     | ReportItemEnchantment
-	     | ReportLightColor
-	     | ReportLightIntensity
-	     | ReportZPlus
-	     | ReportZMinus
-	     | ReportEquip
-	     | ReportDequip
-	     | ReportAcquireSpell
-	     | ReportTarget
-	     | ReportCharges
-	     | ReportXStatus
-	     | ReportPlayerStatus
-	     | ReportModifier
-	     | ReportStatModifier
-	     | ReportNpc
-	     | ReportClientStatus             { extent      :: Extent
+             | ReportArmorValue
+             | ReportGold
+             | ReportPickup
+             | ReportModifiablePickup
+             | ReportDrop
+             | ReportLesson
+             | ReportMundaneArmorEquip
+             | ReportMundaneWeaponEquip
+             | ReportModifiableWeaponEquip
+             | ReportModifiableArmorEquip
+             | ReportArmorDequip
+             | ReportWeaponDequip
+             | ReportTreasureCount
+             | ReportFlagBallWinner
+             | ReportFlagWinner
+             | ReportDeathmatchWinner
+             | ReportDeathmatchTeamWinner
+             | ReportEnchantment
+             | ReportItemEnchantment
+             | ReportLightColor
+             | ReportLightIntensity
+             | ReportZPlus
+             | ReportZMinus
+             | ReportEquip
+             | ReportDequip
+             | ReportAcquireSpell
+             | ReportTarget
+             | ReportCharges
+             | ReportXStatus
+             | ReportPlayerStatus
+             | ReportModifier
+             | ReportStatModifier
+             | ReportNpc
+             | ReportClientStatus             { extent      :: Extent
                                               , isObserving :: Bool } --Word32
-	     | ReportAnimationFrame
-	     | ReportAcquireCreature
-	     | ReportLoseCreature
-	     | ReportExperience
-	     | ReportSpellAward
-	     | ReportSpellStart
-	     | ReportInventoryLoaded
-	     | TryDrop
-	     | TryGet
-	     | TryUse
-	     | TryEquip
-	     | TryDequip
-	     | TryTarget
-	     | TryCreatureEvent
-	     | TrySpell
-	     | TryAbility
-	     | TryCollide
-	     | FxParticlefx
-	     | FxPlasma
-	     | FxSummon
-	     | FxSummonCancel
-	     | FxShield
-	     | FxBlueSparks
-	     | FxYellowSparks
-	     | FxCyanSparks
-	     | FxVioletSparks
-	     | FxExplosion
-	     | FxLesserExplosion
-	     | FxCounterspellExplosion
-	     | FxThinExplosion
-	     | FxTeleport
-	     | FxSmokeBlast
-	     | FxDamagePoof
-	     | FxLightning
-	     | FxEnergyBolt
-	     | FxChainLightningBolt
-	     | FxDrainMana
-	     | FxCharm
-	     | FxGreaterHeal
-	     | FxMagic
-	     | FxSparkExplosion
-	     | FxDeathRay
-	     | FxSentryRay
-	     | FxRicochet
-	     | FxJiggle
-	     | FxGreenBolt
-	     | FxGreenExplosion
-	     | FxWhiteFlash
-	     | FxGeneratingMap
-	     | FxAssemblingMap
-	     | FxPopulatingMap
-	     | FxDurationSpell
-	     | FxDeltazSpellStart
-	     | FxTurnUndead
-	     | FxArrowTrap
-	     | FxVampirism
-	     | FxManaBombCancel
-	     | UpdateStream
-	     | NewAlias
-	     | AudioEvent
-	     | AudioPlayerEvent
-	     | TextMessage
-	     | Inform
-	     | Important
-	     | ImportantAck                   { timestamp :: Timestamp }
-	     | Mouse
-	     | IncomingClient
-	     | OutgoingClient
-	     | GameSettings
-	     | GameSettings2
-	     | UpdateGuiGameSettings
-	     | DoorAngle
-	     | ObeliskCharge
-	     | PentagramActivate
-	     | ClientPredictLinear
-	     | RequestMap
-	     | CancelMap
-	     | MapSendStart
-	     | MapSendPacket
-	     | MapSendAbort
-	     | ServerCmd
-	     | SysopPw
-	     | SysopResult
-	     | KeepAlive
-	     | ReceivedMap
-	     | ClientReady
-	     | RequestSavePlayer
-	     | XferMsg
-	     | PlayerObj
-	     | TeamMsg
-	     | KickNotification
-	     | TimeoutNotification
-	     | ServerQuit
-	     | ServerQuitAck
-	     | Trade
-	     | ChatKill
-	     | MessagesKill
-	     | SeqImportant
-	     | ReportAbilityAward
-	     | ReportAbilityState             { ability     :: Word8
+             | ReportAnimationFrame
+             | ReportAcquireCreature
+             | ReportLoseCreature
+             | ReportExperience
+             | ReportSpellAward
+             | ReportSpellStart
+             | ReportInventoryLoaded
+             | TryDrop
+             | TryGet
+             | TryUse
+             | TryEquip
+             | TryDequip
+             | TryTarget
+             | TryCreatureEvent
+             | TrySpell
+             | TryAbility
+             | TryCollide
+             | FxParticlefx
+             | FxPlasma
+             | FxSummon
+             | FxSummonCancel
+             | FxShield
+             | FxBlueSparks
+             | FxYellowSparks
+             | FxCyanSparks
+             | FxVioletSparks
+             | FxExplosion
+             | FxLesserExplosion
+             | FxCounterspellExplosion
+             | FxThinExplosion
+             | FxTeleport
+             | FxSmokeBlast
+             | FxDamagePoof
+             | FxLightning
+             | FxEnergyBolt
+             | FxChainLightningBolt
+             | FxDrainMana
+             | FxCharm
+             | FxGreaterHeal
+             | FxMagic
+             | FxSparkExplosion
+             | FxDeathRay
+             | FxSentryRay
+             | FxRicochet
+             | FxJiggle
+             | FxGreenBolt
+             | FxGreenExplosion
+             | FxWhiteFlash
+             | FxGeneratingMap
+             | FxAssemblingMap
+             | FxPopulatingMap
+             | FxDurationSpell
+             | FxDeltazSpellStart
+             | FxTurnUndead
+             | FxArrowTrap
+             | FxVampirism
+             | FxManaBombCancel
+             | UpdateStream
+             | NewAlias
+             | AudioEvent
+             | AudioPlayerEvent
+             | TextMessage
+             | Inform
+             | Important
+             | ImportantAck                   { timestamp :: Timestamp }
+             | Mouse
+             | IncomingClient
+             | OutgoingClient
+             | GameSettings
+             | GameSettings2
+             | UpdateGuiGameSettings
+             | DoorAngle
+             | ObeliskCharge
+             | PentagramActivate
+             | ClientPredictLinear
+             | RequestMap
+             | CancelMap
+             | MapSendStart
+             | MapSendPacket
+             | MapSendAbort
+             | ServerCmd
+             | SysopPw
+             | SysopResult
+             | KeepAlive
+             | ReceivedMap
+             | ClientReady
+             | RequestSavePlayer
+             | XferMsg
+             | PlayerObj
+             | TeamMsg
+             | KickNotification
+             | TimeoutNotification
+             | ServerQuit
+             | ServerQuitAck
+             | Trade
+             | ChatKill
+             | MessagesKill
+             | SeqImportant
+             | ReportAbilityAward
+             | ReportAbilityState             { ability     :: Word8
                                               , isReady     :: Bool } --Word8
-	     | ReportActiveAbilities
-	     | Dialog
-	     | ReportGuideAward
-	     | InterestingId
-	     | TimerStatus
-	     | RequestTimerStatus
-	     | JournalMsg
-	     | ChapterEnd
-	     | ReportAllLatency
-	     | ReportFlagStatus
-	     | ReportBallStatus
-	     | ReportObjectPoison
-	     | ReportMonitorCreature
-	     | ReportUnmonitorCreature
-	     | ReportTotalHealth              { extent :: Extent
+             | ReportActiveAbilities
+             | Dialog
+             | ReportGuideAward
+             | InterestingId
+             | TimerStatus
+             | RequestTimerStatus
+             | JournalMsg
+             | ChapterEnd
+             | ReportAllLatency
+             | ReportFlagStatus
+             | ReportBallStatus
+             | ReportObjectPoison
+             | ReportMonitorCreature
+             | ReportUnmonitorCreature
+             | ReportTotalHealth              { extent :: Extent
                                               , hp     :: Word16
                                               , maxHp  :: Word16 }
-	     | ReportTotalMana                { extent :: Extent
+             | ReportTotalMana                { extent :: Extent
                                               , mp     :: Word16
                                               , maxMp  :: Word16 }
-	     | ReportSpellStat
-	     | ReportSecondaryWeapon
-	     | ReportLastQuiver
-	     | InfoBookData
-	     | Social
-	     | FadeBegin                      { unk1 :: Word8   -- always 1?
+             | ReportSpellStat
+             | ReportSecondaryWeapon
+             | ReportLastQuiver
+             | InfoBookData
+             | Social
+             | FadeBegin                      { unk1 :: Word8   -- always 1?
                                               , unk2 :: Word8 } -- always 1?
-	     | MusicEvent
-	     | MusicPushEvent
-	     | MusicPopEvent
-	     | PlayerDied
-	     | PlayerRespawn
-	     | ForgetDrawables
-	     | ResetAbilities       { ability     :: Word8 }
-	     | RateChange
-	     | ReportCreatureCmd
-	     | Vote
-	     | StatMultipliers
-	     | Gauntlet
-	     | InventoryFail
+             | MusicEvent
+             | MusicPushEvent
+             | MusicPopEvent
+             | PlayerDied
+             | PlayerRespawn
+             | ForgetDrawables
+             | ResetAbilities       { ability     :: Word8 }
+             | RateChange
+             | ReportCreatureCmd
+             | Vote
+             | StatMultipliers
+             | Gauntlet
+             | InventoryFail
              deriving (Eq, Show)
 
 instance Enum Message where

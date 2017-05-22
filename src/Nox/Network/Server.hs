@@ -56,26 +56,26 @@ handleMsg = do
                                           , okWeapons = allFlags
                                           , unkBS1 = pack [ 0x00 -- 0=640res,1=800,2=1024, changes to high6? bits here crashes game
                                                           , 0x00
-	                                                  , 0x00
-	                                                  , 0x55
-	                                                  , 0x00
-	                                                  , 0x9A
-	                                                  , 0x03
-	                                                  , 0x01
-	                                                  , 0x00
-	                                                  , 0x07
-	                                                  , 0x21
+                                                          , 0x00
+                                                          , 0x55
+                                                          , 0x00
+                                                          , 0x9A
                                                           , 0x03
-	                                                  , 0x10]
+                                                          , 0x01
+                                                          , 0x00
+                                                          , 0x07
+                                                          , 0x21
+                                                          , 0x03
+                                                          , 0x10]
                                           , okArmors = allFlags
                                           , unkBS3 = pack [
-	                                                    0xFF --notmask
+                                                            0xFF --notmask
                                                           , 0xFF --notmask
                                                           , 0xFF --notmask!
                                                           , 0xFF --notmask
-	                                                  , 0xC0 --notmask
+                                                          , 0xC0 --notmask
                                                           , 0x00
-	                                                  , 0xD4
+                                                          , 0xD4
                                                           , 0x00]
                                           , okSpells = allFlags
                                           , unkBS2 = pack [
