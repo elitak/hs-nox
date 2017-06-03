@@ -52,10 +52,13 @@ handleMsg = do
                                           , mapName = BC.pack "FakeMap"
                                           , gameName = BC.pack "noxd" -- maxlen is 31 inc null
                                           , timestamp = timestamp
+                                          -- TODO though most of the remaniing unknowns do not appear in server info, look at hosting options in the client (when launching from social map) to get ideas on what these remaining flags could indicate. stuff like "closed game" "min/max ping" etc
+                                          -- I should dump and diff responses from the real listenserver using wireshark + a binary template tool, twiddling 1 bit at a time between dumps in the server options menu
                                           , unkB1 = 0x0f --notmask
                                           , unkB2 = 0x0f --notmask
+                                          -- TODO halbred with the heart of nox is always banned? tried flipping bits adjacent to either end with no success in finding the 2 missing halberd bits
                                           , okWeapons = allFlags
-                                          , unkBS1 = pack [ 0x00 -- 0=640res,1=800,2=1024; (any?) changes to bits 4-7 crashes the client when the server is clicked
+                                          , unkBS1 = pack [ 0x00 -- 0=640res,1=800,2=1024; changes to bits 3-6(0ndx) crashes the client when the server is clicked
                                                           , 0x00
                                                           , 0x00
                                                           , 0x55
@@ -78,7 +81,7 @@ handleMsg = do
                                                           , 0xD4
                                                           , 0x00]
                                           --, okSpells = allBut $ unuSp0 .+. unuSp2 .+. unuSp3 .+. unuSp6 .+. unuSp7.+. unuSp11 .+. unuSp15 .+. unuSp17 .+. unuSp18 .+. unuSp20 .+. unuSp53 .+. unuSp55 .+. unuSp57 .+. unuSp59 .+. unuSp45 .+. unuSp25 .+. unuSp68
-                                          , okSpells = allBut $ magicShield
+                                          , okSpells = allFlags
                                           , unkBS2 = pack [ 0xFF --notmask?
                                                           , 0xFF --notmask
                                                           , 0x84

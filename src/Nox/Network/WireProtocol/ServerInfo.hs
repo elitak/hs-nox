@@ -187,7 +187,6 @@ bitmaskWrapper "AllowedSpells" ''BV []
     , ("unuSp143",                 1 `shiftL` 143)
     ]
 
-     -- TODO halbred with the heart of nox is always banned?
 bitmaskWrapper "AllowedWeapons" ''BV []
     [  ("flag",          1   `shiftL` 0)
     ,  ("quiver",          1   `shiftL` 1)
@@ -215,6 +214,7 @@ bitmaskWrapper "AllowedWeapons" ''BV []
     ,  ("forceOfNatureStaff",         1   `shiftL` 21)
     ,  ("wandOfDeath",         1   `shiftL` 22)
     ,  ("halberdOfHorrendous",      1   `shiftL` 23)
+    -- 2 other versions of halberd missing!
     ]
 
 bitmaskWrapper "AllowedArmors" ''BV []
