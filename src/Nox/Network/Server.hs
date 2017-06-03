@@ -14,6 +14,7 @@ import Data.Serialize
 import Data.Flags
 
 import Nox.Network.WireProtocol
+import Nox.Network.WireProtocol.ServerInfo
 
 gamePort = 18590
 maxPayload = 1500
@@ -54,7 +55,7 @@ handleMsg = do
                                           , unkB1 = 0x0f --notmask
                                           , unkB2 = 0x0f --notmask
                                           , okWeapons = allFlags
-                                          , unkBS1 = pack [ 0x00 -- 0=640res,1=800,2=1024; (any?) changes to higher bits here crashes the client.
+                                          , unkBS1 = pack [ 0x00 -- 0=640res,1=800,2=1024; (any?) changes to bits 4-7 crashes the client when the server is clicked
                                                           , 0x00
                                                           , 0x00
                                                           , 0x55
@@ -76,13 +77,15 @@ handleMsg = do
                                                           , 0x00
                                                           , 0xD4
                                                           , 0x00]
-                                          , okSpells = allFlags
+                                          --, okSpells = allBut $ unuSp0 .+. unuSp2 .+. unuSp3 .+. unuSp6 .+. unuSp7.+. unuSp11 .+. unuSp15 .+. unuSp17 .+. unuSp18 .+. unuSp20 .+. unuSp53 .+. unuSp55 .+. unuSp57 .+. unuSp59 .+. unuSp45 .+. unuSp25 .+. unuSp68
+                                          , okSpells = allBut $ magicShield
                                           , unkBS2 = pack [ 0xFF --notmask?
                                                           , 0xFF --notmask
                                                           , 0x84
                                                           , 0x82
                                                           , 0xD3
                                                           , 0x01 ]
+                                                           -- NB better way to RE multiple values at once would be to return multiple server infos to client with diff names for each so that i can cycle thru many attempts simultaneously!!!
                                           }
                     let msgData = runPut $ put resp
                     trace ("resp msg is " ++ show resp) $ 
