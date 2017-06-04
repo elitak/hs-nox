@@ -21,5 +21,5 @@ while true; do
         # more sensible than leaving a version running that doesn't have the
         # changes we expected to be effected.
         pkill noxd
-        cabal build && "$target" &
+        cabal build && { "$target" & }
 done
