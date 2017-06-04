@@ -64,6 +64,7 @@ data Message = Event00
                                        , unkB2 :: Word8
                                        , okWeapons :: AllowedWeapons
                                        , mapName :: MapName
+                                       , resolution :: Resolution
                                        , unkBS1 :: ByteString
                                        , okArmors :: AllowedArmors
                                        , unkBS3 :: ByteString
@@ -588,6 +589,7 @@ instance Serialize Message where
                 putWord8    unkB2
                 putAllowedWeapons okWeapons
                 putMapName  mapName
+                putResolution resolution
                 putByteString unkBS1
                 putAllowedArmors okArmors
                 putByteString unkBS3

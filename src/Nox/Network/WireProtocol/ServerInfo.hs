@@ -20,11 +20,16 @@ instance Flags BV where
         where n = max (size a) (size b)
     commonFlags = (.&.)
 
--- TODO these will be the ids used later on in packets, not the okSpells field
+-- TODO These will be the ids used later on in packets, not the okSpells field
+--      Perhaps there will be a correspondence?
 data Spell = Anchor
            | Blink
            | Burn
+           | ChannelLife
+           | CharmCreature
            deriving (Eq, Show, Enum)
+
+data Resolution = Res640 | Res800 | Res1024 deriving (Eq, Show, Enum)
 
 -- TODO: I would prefer something that is unified. this solution is limited to 64bit length bitmasks
 -- The only way to do that, I think, is to write a Flags instance for ByteString and use that as the wrapped type
@@ -259,4 +264,7 @@ putAllowedSpells (AllowedSpells mask) = putByteString $ pack (Prelude.map (fromI
 putAllowedWeapons (AllowedWeapons mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
 putAllowedArmors (AllowedArmors mask) = putByteString $ pack (Prelude.map (fromIntegral . nat) (Prelude.reverse (group 8 mask)))
 
-
+-- Unclear whether this is a bitmask or enum, since there are only valid 3 values:
+-- 0=640res,1=800,2=1024; changes to bits 3-6(0ndx) crashes the client when the server is clicked
+putResolution :: (Enum a) => a -> Put
+putResolution = putWord8 . fromIntegral . fromEnum
