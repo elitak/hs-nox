@@ -1,5 +1,10 @@
 #! /usr/bin/env bash
 
+# TODO detect a second change to files and abort slow-running cabal-build and restart it
+# TODO nixify and include as part of nix-build's output?
+# TODO put this in hs-nix-template once fully generalized
+
+# TODO detect target by parsing *.cabal
 target="./dist/build/noxd/noxd"
 
 trap cleanup SIGINT
@@ -20,6 +25,6 @@ while true; do
         # Do not leave daemon running, in the case of build failure. This is
         # more sensible than leaving a version running that doesn't have the
         # changes we expected to be effected.
-        pkill noxd
+        pkill $(basename $target)
         cabal build && { "$target" & }
 done
