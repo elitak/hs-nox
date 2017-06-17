@@ -10,9 +10,10 @@ import System.Posix.IO
 --import System.Posix.Directory
 import System.Exit
 import Nox.Network.Server
+import Version
 
 main = do
-    putStrLn "noxd v0.1" -- v1.0 will be all original nox msgs supported, if not game modes (like Quest)
+    putStrLn $ "noxd " ++ version
 
     --runResourceT $ sourceFile "gamedata.bin" $= decrypt GameData $$ sinkFile "gamedata.txt"
     --runResourceT $ sourceFile "So_Beach.map" $= decrypt Map $$ sinkFile "map.out"

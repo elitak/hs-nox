@@ -15,6 +15,13 @@ cleanup() {
         exit
 }
 
+updateBuild() {
+        local nextBuild
+        nextBuild=$(grep -E '^ *version:' ./*.cabal | awk '{print $2}' | awk -F'.' '{print $1"."$2"."$3"."++$4}')
+        sed -ri ./*.cabal -e "s/^( *version: *)[0-9.]+$/\1$nextBuild/"
+        touch ./src/Version.hs # Any files using cabal-file-th be touched so that TH regens any strings pulled from cabal
+}
+
 # Start the daemon once, on initial run, if possible
 [[ -x "$target" ]] && "$target" &
 
@@ -25,6 +32,7 @@ while true; do
         # Do not leave daemon running, in the case of build failure. This is
         # more sensible than leaving a version running that doesn't have the
         # changes we expected to be effected.
-        pkill $(basename $target)
+        pkill "$(basename $target)"
+        updateBuild
         cabal build && { "$target" & }
 done
