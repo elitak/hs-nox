@@ -1,4 +1,4 @@
-{ nixpkgs ? import ../nixpkgs/actual { }
+{ nixpkgs ? import <nixpkgs> { }
 , compiler ? "ghc7102"
 }:
 let
