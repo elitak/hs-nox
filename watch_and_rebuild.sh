@@ -20,6 +20,7 @@ updateBuild() {
         nextBuild=$(grep -E '^ *version:' ./*.cabal | awk '{print $2}' | awk -F'.' '{print $1"."$2"."$3"."++$4}')
         sed -ri ./*.cabal -e "s/^( *version: *)[0-9.]+$/\1$nextBuild/"
         touch ./src/Version.hs # Any files using cabal-file-th be touched so that TH regens any strings pulled from cabal
+        cabal configure >& /dev/null # we get warned otherwise
 }
 
 # Start the daemon once, on initial run, if possible

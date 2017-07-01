@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                hs-nox
-version:             0.1.0.6
+version:             0.1.0.13
 synopsis:            A reimplementation of Westwood Studio's Nox, released in 2000
 description:         This project's first priority is to reimplement the Nox
                      dedicated server as a headless, cross-platform binary.
