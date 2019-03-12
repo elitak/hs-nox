@@ -40,3 +40,7 @@ child = do
 
 -- TODO Test performance early and often, so that I can make sure the server binary runs as-fast or faster than original in terms of netcode/responsiveness
 -- In particular, I worry that an elegant, Alternative-based (de)serializer might be slow (or whatever solution I pick).
+
+
+
+

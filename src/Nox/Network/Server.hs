@@ -26,10 +26,10 @@ noxd = withSocketsDo $ do
     --      It has to be used conditionally, based on what msgtype arrives.
     --let loop sock = (sourceSocket sock maxPayload $= decipher =$= handleMsg =$= encipher $$ sinkToSocket sock) >> loop sock
     -- TODO Am i even getting anything out of using conduits here?
-    let loop s = ( sourceSocket s maxPayload
-                $= handleMsg
-                $$ sinkToSocket s
-                 ) >> loop s
+    let loop s = runConduit (  sourceSocket s maxPayload
+                            .| handleMsg
+                            .| sinkToSocket s
+                            ) >> loop s
     loop sock
 
 --data NoxMessage = NoxMessage { sender :: !SockAddr, xor :: !Word8, payload :: !ByteString }
