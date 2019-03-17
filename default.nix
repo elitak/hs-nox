@@ -12,9 +12,11 @@ let
     ) includedFiles
   ) src;
 in (haskellPackages.callPackage ./package.nix {
-  cabal-file-th = haskellPackages.cabal-file-th.overrideDerivation (oldAttrs: {
-    patches = [ ./cabal-file-th.patch ];
-  });
+  # Haskell overrides go here
+
+  #cabal-file-th = haskellPackages.cabal-file-th.overrideDerivation (oldAttrs: {
+  #  patches = [ ./cabal-file-th.patch ];
+  #});
 }).overrideDerivation (old: {
   #src = cleanSource old.src; # this is an option, but leaves behind all the binary junk TODO
   src = include [
