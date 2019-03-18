@@ -1,4 +1,5 @@
-{ pkgs ? import <nixpkgs> { }
+{ nixpkgs ? builtins.fetchTarball https://github.com/NixOS/nixpkgs/archive/7f35ed9df40f12a79a242e6ea79b8a472cf74d42.tar.gz # 19.03 release
+, pkgs ? import nixpkgs { }
 , compiler ? "default"
 }:
 with pkgs; with pkgs.lib; with builtins;
